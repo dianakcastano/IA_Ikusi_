@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: ikusi-cuestionario-app
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - ADMIN_PASSWORD=ikusiadmin123  # Cambia esto en producción
+      - DATABASE_PATH=/app/data/ikusi_cuestionario.db
+      - NODE_ENV=production
+    volumes:
+      - ./data:/app/data
+    restart: always

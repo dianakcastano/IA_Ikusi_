@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiempo para lo que importa · Ikusi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F7F3;
+    --surface: #FFFFFF;
+    --ink: #15241B;
+    --ink-soft: #52665A;
+    --green: #15883F;
+    --green-bright: #1FA64C;
+    --green-deep: #0E6630;
+    --mint: #E5F2E7;
+    --mint-2: #F0F7F1;
+    --line: #DCE6DC;
+    --line-strong: #C3D3C5;
+    --gold: #C98A2B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    line-height: 1.55;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(110% 70% at 50% -20%, rgba(31,166,76,.07), transparent 60%);
+  }
+  .wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 22px 22px 72px; }
+  .eyebrow { font-weight: 600; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--green); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 15px; letter-spacing: .04em; color: var(--green-deep); }
+  .brand img { height: 32px; width: auto; object-fit: contain; }
+  .brand-text { font-family: "Schibsted Grotesk", sans-serif; font-weight: 700; border-left: 2px solid var(--line-strong); padding-left: 12px; }
+  .step-label { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+  
+  .screen { display: none; animation: fade .45s ease both; }
+  .screen.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  
+  .btn {
+    font-family: "Schibsted Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 15.5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    padding: 15px 26px;
+    transition: transform .15s, box-shadow .2s, background .2s;
+  }
+  .btn-primary { background: var(--green); color: #fff; box-shadow: 0 8px 22px -10px rgba(21,136,63,.55); }
+  .btn-primary:hover { background: var(--green-bright); transform: translateY(-2px); }
+  .btn-primary:disabled { background: #B9CDBE; color: #fff; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-ghost { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+  
+  /* Hero */
+  #hero { padding-top: 4vh; text-align: center; }
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 7px 16px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .hero-pill .live { width: 8px; height: 8px; border-radius: 50%; background: var(--green-bright); animation: live 2s infinite; }
+  @keyframes live { 0%, 100% { box-shadow: 0 0 0 0 rgba(31,166,76,.5); } 50% { box-shadow: 0 0 0 6px rgba(31,166,76,0); } }
+  .hero-pill b { color: var(--green); font-weight: 700; }
+  .hero-title { font-family: "Schibsted Grotesk", sans-serif; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; font-size: clamp(34px, 6vw, 64px); margin-bottom: 18px; }
+  .hero-title em { font-style: normal; color: var(--green); }
+  .hero-sub { max-width: 620px; margin: 0 auto 32px; font-size: clamp(16px, 2vw, 18.5px); color: var(--ink-soft); }
+  
+  /* Choice selector */
+  .choice-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto 36px; text-align: left; }
+  @media (max-width: 640px) { .choice-container { grid-template-columns: 1fr; } }
+  
+  .card-choice {
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 26px;
+    cursor: pointer;
+    transition: transform .2s, border-color .2s, box-shadow .2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card-choice:hover {
+    border-color: var(--green-bright);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0,0,0,0.06);
+  }
+  .card-choice.active { border-color: var(--green); background: var(--mint-2); }
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--mint);
+    display: grid;
+    place-items: center;
+    color: var(--green-deep);
+    margin-bottom: 20px;
+  }
+  .card-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .card-choice h3 { font-family: "Schibsted Grotesk", sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
+  .card-choice p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 20px; }
+  .card-arrow { font-size: 14px; font-weight: 700; color: var(--green); display: flex; align-items: center; gap: 6px; margin-top: auto; }
+  
+  .hero-note { font-size: 13.5px; color: var(--ink-soft); margin-top: 10px; }
+  .hero-note b { color: var(--green-deep); font-weight: 600; }
+  
+  /* Flow */
+  .flow { max-width: 600px; margin: 0 auto; }
+  .progress { display: flex; gap: 5px; margin: 4px 0 24px; }
+  .progress span { height: 5px; flex: 1; background: var(--line); border-radius: 3px; transition: background .3s; }
+  .progress span.done { background: var(--green); }
+  
+  .chip-ctx {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--mint-2);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 6px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .chip-ctx b { color: var(--green-deep); }
+  
+  .q-num { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+  .q-title { font-family: "Schibsted Grotesk", sans-serif; font-weight: 800; letter-spacing: -.01em; font-size: clamp(22px, 3.6vw, 28px); line-height: 1.15; margin: 8px 0; }
+  .q-ctx { color: var(--ink-soft); font-size: 14.5px; margin-bottom: 20px; }
+  
+  .opt-stack { display: flex; flex-direction: column; gap: 11px; }
+  .opt {
+    text-align: left;
+    cursor: pointer;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: .15s;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    width: 100%;
+    font-family: inherit;
+  }
+  .opt:hover { border-color: var(--green-bright); transform: translateX(3px); }
+  .opt:focus-visible { outline: 3px solid var(--green-bright); outline-offset: 2px; }
+  .opt.sel { border-color: var(--green); background: var(--mint-2); }
+  .opt .oic {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--mint);
+    display: grid;
+    place-items: center;
+    color: var(--green-deep);
+    flex-shrink: 0;
+  }
+  .opt .oic svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+  .opt .otx { flex: 1; min-width: 0; }
+  .opt .ot { font-family: "Schibsted Grotesk", sans-serif; font-weight: 700; font-size: 15.5px; display: block; color: var(--ink); }
+  .opt small { display: block; color: var(--ink-soft); font-weight: 400; font-size: 12.5px; margin-top: 1px; }
+  .opt .arr { color: var(--green); font-weight: 800; opacity: 0; transition: .15s; font-size: 16px; flex-shrink: 0; }
+  .opt:hover .arr, .opt.sel .arr { opacity: 1; }
+  
+  /* Grid selection (multiple choices) */
+  .chips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  @media (max-width: 480px) { .chips-grid { grid-template-columns: 1fr; } }
+  
+  .chip-select {
+    cursor: pointer;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    transition: .15s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    font-family: inherit;
+  }
+  .chip-select:hover { border-color: var(--green-bright); }
+  .chip-select.sel { border-color: var(--green); background: var(--mint-2); }
+  .chip-select .check {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid var(--line-strong);
+    display: grid;
+    place-items: center;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .chip-select.sel .check {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .chip-select .check svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 3; fill: none; display: none; }
+  .chip-select.sel .check svg { display: block; }
+  
+  /* Simple chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip {
+    cursor: pointer;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 100px;
+    padding: 11px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    transition: .15s;
+    font-family: inherit;
+  }
+  .chip:hover { border-color: var(--green-bright); }
+  .chip.sel { background: var(--green); border-color: var(--green); color: #fff; }
+  
+  /* Input fields */
+  .field {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    transition: .15s;
+  }
+  .field::placeholder { color: #9DB0A2; }
+  .field:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(21,136,63,.13); }
+  textarea.field { resize: none; min-height: 90px; }
+  
+  .flabel { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin: 0 0 6px 2px; }
+  .hint { margin-top: 8px; font-size: 12.5px; color: var(--ink-soft); }
+  .hint b { color: var(--green-deep); }
+  
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; gap: 14px; }
+  .back { background: none; border: none; color: var(--ink-soft); cursor: pointer; font-size: 14px; font-weight: 600; padding: 8px 4px; display: flex; align-items: center; gap: 4px; }
+  .back:hover { color: var(--ink); }
+  
+  /* Done screen */
+  #done { text-align: center; padding-top: 4vh; }
+  .badge { width: 72px; height: 72px; border-radius: 50%; background: var(--mint); display: grid; place-items: center; margin: 0 auto 24px; }
+  .badge svg { width: 34px; height: 34px; stroke: var(--green); stroke-width: 2.5; fill: none; }
+  
+  .done-title { font-family: "Schibsted Grotesk", sans-serif; font-weight: 800; letter-spacing: -.02em; font-size: clamp(28px, 5vw, 40px); }
+  .done-sub { max-width: 500px; margin: 16px auto 0; color: var(--ink-soft); font-size: 15.5px; }
+  .done-sub b { color: var(--ink); }
+  
+  .wall { max-width: 600px; margin: 40px auto 0; text-align: left; }
+  .wall h4 {
+    font-size: 12px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .wall h4 .live { width: 8px; height: 8px; border-radius: 50%; background: var(--green-bright); animation: live 2s infinite; }
+  .case {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 13px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    margin-bottom: 9px;
+    animation: fade .4s both;
+  }
+  .case .cv { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .case .cby { margin-left: auto; font-size: 12.5px; color: var(--ink-soft); white-space: nowrap; }
+  .case .cdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--green); }
+  .case .cdot.idea { background: var(--gold); }
+  
+  .restart { margin-top: 34px; }
+  
+  .demo-indicator {
+    background: #FFF2CC;
+    border: 1px solid #FFE599;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #7F6000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+  }
+  .demo-indicator svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none!important; transition: none!important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar">
+    <div class="brand">
+      <img src="logo-ikusi.jpg" alt="Logo Ikusi" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='grid';">
+      <span id="logoFallback" class="mark" style="display:none; width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--green-bright),var(--green-deep)); place-items:center; color:#fff; font-family:'Schibsted Grotesk'; font-weight:800; font-size:16px;">i</span>
+      <span class="brand-text">Cuestionario</span>
+    </div>
+    <div class="step-label" id="stepLabel">Ideas & Soluciones</div>
+  </div>
+
+  <div class="demo-indicator" id="demoBanner" style="display: none;">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <span><b>Modo Demostración:</b> Servido desde GitHub Pages o local estático. Los datos se guardarán en tu <b>localStorage</b> de forma segura y no requieren servidor backend.</span>
+  </div>
+
+  <!-- HERO -->
+  <section class="screen active" id="hero">
+    <div class="hero-pill"><span class="live"></span> <b id="liveN">48</b>&nbsp;aportes registrados</div>
+    <h1 class="hero-title">Tiempo para<br><em>lo que importa</em></h1>
+    <p class="hero-sub">Impulsamos la innovación liberando tu potencial de las tareas repetitivas. Queremos mapear las iniciativas de tecnología e IA que ya tienes, y también entender qué procesos pesados te gustaría automatizar.</p>
+    
+    <div class="choice-container">
+      <div class="card-choice" onclick="selectFlow('iniciativa')">
+        <div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>Registrar una Iniciativa o Desarrollo de IA</h3>
+          <p>Comparte soluciones, scripts, chatbots o integraciones de IA que hayas desarrollado o en las que estés participando.</p>
+        </div>
+        <div class="card-arrow">Registrar desarrollo →</div>
+      </div>
+
+      <div class="card-choice" onclick="selectFlow('tarea')">
+        <div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          </div>
+          <h3>Reportar una Tarea Repetitiva / Aburrida</h3>
+          <p>Cuéntanos qué procesos repetitivos de tu día a día te quitan tiempo. No necesitas saber de código ni tener una solución en mente.</p>
+        </div>
+        <div class="card-arrow">Reportar tarea →</div>
+      </div>
+    </div>
+    
+    <p class="hero-note"><b>Toma menos de un minuto.</b> Tu aporte nos ayuda a cocrear soluciones.</p>
+  </section>
+
+  <!-- FLOW -->
+  <section class="screen" id="flow">
+    <div class="flow">
+      <div class="eyebrow" id="flowEyebrow">Paso 1</div>
+      <div class="progress" id="prog"></div>
+      <div class="chip-ctx" id="ctxChip" style="display:none">Tipo: <b id="ctxName">—</b></div>
+      
+      <div id="stepBody"></div>
+      
+      <div class="nav">
+        <button class="back" id="backBtn" onclick="prevStep()">‹ Atrás</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Siguiente</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DONE -->
+  <section class="screen" id="done">
+    <div class="badge"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h2 class="done-title">¡Muchas gracias!</h2>
+    <p class="done-sub" id="doneSub">Tu aporte quedó registrado en el sistema.</p>
+    
+    <div class="wall">
+      <h4><span class="live"></span> Aportes recientes del equipo</h4>
+      <div id="wallList"></div>
+    </div>
+    
+    <button class="btn btn-ghost restart" onclick="restart()">Registrar otro aporte</button>
+  </section>
+
+</div>
+
+<script>
+// Iconos SVG reutilizables
+const ICONS = {
+  copy: '<path d="M9 9h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z"/><path d="M5 15H4a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/>',
+  report: '<path d="M4 4h16v16H4z"/><path d="M8 14v3M12 10v7M16 8v9"/>',
+  excel: '<path d="M4 4h16v16H4z"/><path d="M4 9h16M4 14h16M10 4v16"/>',
+  mail: '<path d="M3 5h18v14H3z"/><path d="M3 6l9 7 9-7"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  yes: '<path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>',
+  no: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',
+  build: '<path d="M14 7l3 3-8 8-3 .5.5-3z"/><path d="M3 21h18"/>',
+  hand: '<path d="M9 11V6a2 2 0 1 1 4 0v5"/><path d="M13 11V5a2 2 0 1 1 4 0v6"/><path d="M5 13l-1-2a2 2 0 0 1 3.5-2L9 11"/><path d="M17 11a2 2 0 0 1 4 0v3a7 7 0 0 1-7 7h-1a7 7 0 0 1-6-3.5L5 13"/>',
+  seed: '<path d="M12 2v8"/><path d="M12 10c0-3 2-5 6-5 0 3-2 5-6 5z"/><path d="M12 10c0-3-2-5-6-5 0 3 2 5 6 5z"/><path d="M6 14h12l-1 7H7z"/>',
+  check: '<path d="M20 6L9 17l-5-5"/>'
+};
+
+const TASKS = [
+  { id: 'copy', name: 'Copiar y pegar entre sistemas', meta: 'Mover datos a mano de una herramienta a otra', icon: 'copy' },
+  { id: 'report', name: 'Armar reportes a mano', meta: 'Consolidación semanal o mensual de informes', icon: 'report' },
+  { id: 'excel', name: 'Llenar y mantener Excel', meta: 'Planillas compartidas, listas de control, seguimientos', icon: 'excel' },
+  { id: 'mail', name: 'Responder los mismos correos', meta: 'Notificaciones, solicitudes repetitivas, respuestas plantilla', icon: 'mail' },
+  { id: 'search', name: 'Buscar datos en varias herramientas', meta: 'Juntar información que está regada en diferentes plataformas', icon: 'search' },
+  { id: 'otro', name: 'Otra tarea tediosa', meta: 'Cuéntanos qué otra labor rutinaria te consume tiempo', icon: 'plus' },
+];
+
+const SEED_WALL = [
+  { v: 'Consolidación mensual de facturación', by: 'Sofía', type: 'iniciativa', idea: true },
+  { v: 'Llenar planilla de incidencias del NOC', by: 'Carlos', type: 'tarea', idea: false },
+  { v: 'Dashboard de avance del Delivery', by: 'Alejandro', type: 'iniciativa', idea: true },
+  { v: 'Copiar datos de CRM a reporte técnico', by: 'Marta', type: 'tarea', idea: false }
+];
+
+// Áreas de Ikusi
+const AREAS = [
+  'Operaciones / Delivery',
+  'Mesa de ayuda / Soporte',
+  'NOC',
+  'Preventa / Ingeniería',
+  'Comercial',
+  'Administración / Finanzas',
+  'Recursos Humanos',
+  'Otra'
+];
+
+// Estado de la aplicación
+const state = {
+  // Configuración general
+  flowType: '', // 'iniciativa' o 'tarea'
+  nombre: '',
+  area: '',
+  email: '',
+  
+  // Datos de flujo iniciativa (PDF)
+  iniciativa_nombre: '',
+  iniciativa_estado: '',
+  iniciativa_impacto: '',
+  iniciativa_destinatario: '',
+  iniciativa_tipo_tech: '',
+  iniciativa_problema: '',
+  iniciativa_solucion: '',
+  iniciativa_beneficio: '',
+  iniciativa_ahorro_valor: '',
+  iniciativa_ahorro_unidad: 'minutos',
+  iniciativa_usuarios_estimados: '',
+  iniciativa_componentes: [],
+  iniciativa_fuentes: [],
+  
+  // Datos de flujo tarea (HTML)
+  tarea_tipo: '',
+  tarea_frecuencia: '',
+  tarea_duracion: '',
+  tarea_unidad: 'horas',
+  tarea_tiene_idea: '',
+  tarea_idea_nombre: '',
+  tarea_idea_descripcion: '',
+  tarea_idea_estado: '',
+  tarea_idea_herramienta: '',
+  tarea_participacion: ''
+};
+
+let step = 0;
+let liveCount = 48;
+let wall = [...SEED_WALL];
+
+// Determinar si estamos corriendo en GitHub Pages o localmente sin backend
+const isDemo = window.location.hostname.includes('github.io') || 
+               window.location.protocol === 'file:' || 
+               window.location.search.includes('demo=true');
+
+if (isDemo) {
+  document.getElementById('demoBanner').style.display = 'flex';
+  // Cargar contador y aportes de localStorage si existen
+  const localCount = localStorage.getItem('ikusi_live_count');
+  if (localCount) liveCount = parseInt(localCount);
+  
+  const localWall = localStorage.getItem('ikusi_wall');
+  if (localWall) {
+    try { wall = JSON.parse(localWall); } catch(e) {}
+  }
+  document.getElementById('liveN').textContent = liveCount;
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectFlow(type) {
+  state.flowType = type;
+  step = 0;
+  
+  // Inicializar campos por defecto
+  state.iniciativa_ahorro_unidad = 'minutos';
+  state.iniciativa_componentes = [];
+  state.iniciativa_fuentes = [];
+  state.tarea_unidad = 'horas';
+  
+  show('flow');
+  renderStep();
+}
+
+function restart() {
+  // Limpiar estado
+  Object.assign(state, {
+    flowType: '', nombre: '', area: '', email: '',
+    iniciativa_nombre: '', iniciativa_estado: '', iniciativa_impacto: '', iniciativa_destinatario: '',
+    iniciativa_tipo_tech: '', iniciativa_problema: '', iniciativa_solucion: '', iniciativa_beneficio: '',
+    iniciativa_ahorro_valor: '', iniciativa_ahorro_unidad: 'minutos', iniciativa_usuarios_estimados: '',
+    iniciativa_componentes: [], iniciativa_fuentes: [],
+    tarea_tipo: '', tarea_frecuencia: '', tarea_duracion: '', tarea_unidad: 'horas',
+    tarea_tiene_idea: '', tarea_idea_nombre: '', tarea_idea_descripcion: '', tarea_idea_estado: '',
+    tarea_idea_herramienta: '', tarea_participacion: ''
+  });
+  step = 0;
+  show('hero');
+}
+
+// Obtener secuencia de pasos dinámica según el flujo y las respuestas
+function getSteps() {
+  if (state.flowType === 'iniciativa') {
+    return [
+      'identidad_ini', // Nombre, Área, Correo
+      'datos_ini',     // Nombre iniciativa, estado, área impacto
+      'alcance_ini',   // Destinatario, tipo tecnología
+      'detalles_ini',  // Problema, solución
+      'beneficios_ini',// Beneficio principal, ahorro tiempo, cantidad usuarios
+      'tech_ini',      // Componentes tecnológicos (GPT, etc) y fuentes de datos (SharePoint, ERP)
+      'participacion_ini' // ¿Contamos contigo?
+    ];
+  } else {
+    const list = [
+      'identidad_tar', // Nombre, Área
+      'tarea_tar',     // Tipo de tarea tediosa
+      'tiempo_tar',    // Frecuencia y duración
+      'tieneidea_tar'  // ¿Tiene idea?
+    ];
+    if (state.tarea_tiene_idea === 'si') {
+      list.push('idea_tar');      // Nombre y descripción de la idea
+      list.push('estado_tar');    // Estado de la idea e instrumento / herramienta
+    }
+    list.push('participacion_tar'); // ¿Quiere participar en la construcción?
+    return list;
+  }
+}
+
+function renderProgress() {
+  const all = getSteps();
+  document.getElementById('prog').innerHTML = all.map((_, i) => 
+    `<span class="${i <= step ? 'done' : ''}"></span>`
+  ).join('');
+}
+
+function optRow(icon, title, sub, selected, onclick) {
+  return `<button type="button" class="opt ${selected ? 'sel' : ''}" onclick="${onclick}">
+    <span class="oic"><svg viewBox="0 0 24 24">${ICONS[icon] || ''}</svg></span>
+    <span class="otx"><span class="ot">${title}</span>${sub ? `<small>${sub}</small>` : ''}</span>
+    <span class="arr">→</span></button>`;
+}
+
+function toggleChip(arrayName, val, element) {
+  const arr = state[arrayName];
+  const idx = arr.indexOf(val);
+  if (idx > -1) {
+    arr.splice(idx, 1);
+    element.classList.remove('sel');
+  } else {
+    arr.push(val);
+    element.classList.add('sel');
+  }
+  // Forzar validación del paso actual
+  validateCurrentStep();
+}
+
+function validateCurrentStep() {
+  const key = getSteps()[step];
+  const nextBtn = document.getElementById('nextBtn');
+  let isValid = false;
+  
+  if (key === 'identidad_ini') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    isValid = state.nombre.trim().length >= 2 && state.area && emailRegex.test(state.email);
+  } else if (key === 'datos_ini') {
+    isValid = state.iniciativa_nombre.trim().length >= 3 && state.iniciativa_estado && state.iniciativa_impacto;
+  } else if (key === 'alcance_ini') {
+    isValid = state.iniciativa_destinatario && state.iniciativa_tipo_tech;
+  } else if (key === 'detalles_ini') {
+    isValid = state.iniciativa_problema.trim().length >= 10 && state.iniciativa_solucion.trim().length >= 10;
+  } else if (key === 'beneficios_ini') {
+    const val = Number(state.iniciativa_ahorro_valor);
+    const users = Number(state.iniciativa_usuarios_estimados);
+    isValid = state.iniciativa_beneficio && (val > 0) && (users > 0);
+  } else if (key === 'tech_ini') {
+    isValid = state.iniciativa_componentes.length > 0 && state.iniciativa_fuentes.length > 0;
+  } else if (key === 'participacion_ini') {
+    isValid = !!state.tarea_participacion; // Reciclamos tarea_participacion para iniciativa
+  } 
+  // Flujo Tarea
+  else if (key === 'identidad_tar') {
+    isValid = state.nombre.trim().length >= 2 && state.area;
+  } else if (key === 'tarea_tar') {
+    isValid = !!state.tarea_tipo;
+  } else if (key === 'tiempo_tar') {
+    isValid = state.tarea_frecuencia && (Number(state.tarea_duracion) > 0);
+  } else if (key === 'tieneidea_tar') {
+    isValid = !!state.tarea_tiene_idea;
+  } else if (key === 'idea_tar') {
+    isValid = state.tarea_idea_nombre.trim().length >= 3 && state.tarea_idea_descripcion.trim().length >= 10;
+  } else if (key === 'estado_tar') {
+    isValid = state.tarea_idea_estado && state.tarea_idea_herramienta;
+  } else if (key === 'participacion_tar') {
+    isValid = !!state.tarea_participacion;
+  }
+  
+  nextBtn.disabled = !isValid;
+}
+
+function renderStep() {
+  const key = getSteps()[step];
+  renderProgress();
+  const body = document.getElementById('stepBody');
+  const nextBtn = document.getElementById('nextBtn');
+  const ctx = document.getElementById('ctxChip');
+  
+  document.getElementById('backBtn').style.visibility = 'visible';
+  nextBtn.textContent = 'Siguiente';
+  
+  // Chip de contexto superior
+  ctx.style.display = 'inline-flex';
+  if (state.flowType === 'iniciativa') {
+    document.getElementById('ctxName').textContent = 'Iniciativa IA';
+  } else {
+    document.getElementById('ctxName').textContent = 'Reportar Tarea';
+  }
+  
+  let html = '';
+  
+  // ==========================================
+  // FLUJO INICIATIVA (PDF)
+  // ==========================================
+  
+  if (key === 'identidad_ini') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 1 · Tu Información';
+    html = `
+      <div class="q-num">Pregunta 1 de 7</div>
+      <div class="q-title">¿Quién lidera o participa en esta iniciativa?</div>
+      <div class="q-ctx">Queremos reconocer tus capacidades y mantenernos en contacto sobre esta innovación.</div>
+      
+      <div class="flabel">Tu Nombre Completo *</div>
+      <input class="field" id="nombreField" placeholder="Ej: Juan Pérez" value="${state.nombre}" style="margin-bottom:14px">
+      
+      <div class="flabel">Tu Correo Electrónico Corporativo *</div>
+      <input class="field" type="email" id="emailField" placeholder="Ej: jperez@ikusi.com" value="${state.email}" style="margin-bottom:14px">
+      
+      <div class="flabel">Tu Área de Trabajo *</div>
+      <select class="field" id="areaField">
+        <option value="" ${!state.area ? 'selected' : ''} disabled>Selecciona tu área</option>
+        ${AREAS.map(a => `<option ${state.area === a ? 'selected' : ''}>${a}</option>`).join('')}
+      </select>
+    `;
+    body.innerHTML = html;
+    
+    const n = document.getElementById('nombreField'), e = document.getElementById('emailField'), a = document.getElementById('areaField');
+    const update = () => { state.nombre = n.value; state.email = e.value; validateCurrentStep(); };
+    n.addEventListener('input', update);
+    e.addEventListener('input', update);
+    a.addEventListener('change', () => { state.area = a.value; update(); });
+    n.focus();
+  }
+  
+  else if (key === 'datos_ini') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 2 · Datos del Proyecto';
+    const estados = [
+      { id: 'Idea', t: 'Idea', s: 'Apenas formulada, sin código' },
+      { id: 'Prueba de concepto', t: 'Prueba de concepto', s: 'Borrador o prototipo a medio camino' },
+      { id: 'En desarrollo', t: 'En desarrollo', s: 'Construyendo activamente' },
+      { id: 'Implementado', t: 'Implementado', s: 'En producción y siendo utilizada' }
+    ];
+    html = `
+      <div class="q-num">Pregunta 2 de 7</div>
+      <div class="q-title">Cuéntanos sobre la iniciativa</div>
+      <div class="q-ctx">Define el nombre de tu desarrollo y en qué nivel de avance se encuentra.</div>
+      
+      <div class="flabel">Nombre de la Iniciativa *</div>
+      <input class="field" id="iniNombreField" placeholder="Ej: Asistente Documental de Preventa" value="${state.iniciativa_nombre}" style="margin-bottom:18px">
+      
+      <div class="flabel">Estado Actual *</div>
+      <select class="field" id="iniEstadoField" style="margin-bottom:18px">
+        <option value="" disabled ${!state.iniciativa_estado ? 'selected' : ''}>Elige el estado</option>
+        ${estados.map(es => `<option value="${es.id}" ${state.iniciativa_estado === es.id ? 'selected' : ''}>${es.t} (${es.s})</option>`).join('')}
+      </select>
+      
+      <div class="flabel">Área Principal Impactada *</div>
+      <select class="field" id="iniImpactoField">
+        <option value="" disabled ${!state.iniciativa_impacto ? 'selected' : ''}>Elige el área impactada</option>
+        ${AREAS.map(ar => `<option ${state.iniciativa_impacto === ar ? 'selected' : ''}>${ar}</option>`).join('')}
+        <option value="Multidisciplinario" ${state.iniciativa_impacto === 'Multidisciplinario' ? 'selected' : ''}>Multidisciplinario (Afecta a varias áreas)</option>
+      </select>
+    `;
+    body.innerHTML = html;
+    
+    const nm = document.getElementById('iniNombreField'), es = document.getElementById('iniEstadoField'), im = document.getElementById('iniImpactoField');
+    const update = () => { state.iniciativa_nombre = nm.value; validateCurrentStep(); };
+    nm.addEventListener('input', update);
+    es.addEventListener('change', () => { state.iniciativa_estado = es.value; update(); });
+    im.addEventListener('change', () => { state.iniciativa_impacto = im.value; update(); });
+  }
+  
+  else if (key === 'alcance_ini') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 3 · Alcance y Destino';
+    const destinatarios = ['Cliente Interno', 'Cliente externo', 'Proveedor', 'Mixto (Interno - externo)'];
+    const techs = ['Chatbot', 'Formulario inteligente', 'Automatización', 'Dashboard', 'Agente IA', 'Base de conocimiento', 'Asistente documental', 'Otro'];
+    
+    html = `
+      <div class="q-num">Pregunta 3 de 7</div>
+      <div class="q-title">¿A quién sirve y qué tipo de solución es?</div>
+      <div class="q-ctx">Así categorizamos el alcance del desarrollo en Ikusi.</div>
+      
+      <div class="flabel">Tipo de Usuario Destinatario *</div>
+      <select class="field" id="iniDestField" style="margin-bottom:18px">
+        <option value="" disabled ${!state.iniciativa_destinatario ? 'selected' : ''}>Elige una opción</option>
+        ${destinatarios.map(d => `<option ${state.iniciativa_destinatario === d ? 'selected' : ''}>${d}</option>`).join('')}
+      </select>
+      
+      <div class="flabel">Tipo de Solución Tecnológica *</div>
+      <select class="field" id="iniTechField">
+        <option value="" disabled ${!state.iniciativa_tipo_tech ? 'selected' : ''}>Elige una opción</option>
+        ${techs.map(t => `<option ${state.iniciativa_tipo_tech === t ? 'selected' : ''}>${t}</option>`).join('')}
+      </select>
+    `;
+    body.innerHTML = html;
+    
+    const dst = document.getElementById('iniDestField'), tch = document.getElementById('iniTechField');
+    const update = () => { validateCurrentStep(); };
+    dst.addEventListener('change', () => { state.iniciativa_destinatario = dst.value; update(); });
+    tch.addEventListener('change', () => { state.iniciativa_tipo_tech = tch.value; update(); });
+  }
+  
+  else if (key === 'detalles_ini') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 4 · Problemática y Lógica';
+    html = `
+      <div class="q-num">Pregunta 4 de 7</div>
+      <div class="q-title">¿Qué problema resuelve y cómo funciona?</div>
+      <div class="q-ctx">Describe en tus palabras la motivación de este desarrollo.</div>
+      
+      <div class="flabel">¿Qué problema específico busca resolver? *</div>
+      <textarea class="field" id="iniProbField" placeholder="Describe brevemente el dolor, ineficiencia o cuello de botella..." style="margin-bottom:18px">${state.iniciativa_problema}</textarea>
+      
+      <div class="flabel">¿Cómo lo soluciona tu desarrollo? *</div>
+      <textarea class="field" id="iniSolField" placeholder="Explica la lógica del desarrollo y cómo alivia el problema...">${state.iniciativa_solucion}</textarea>
+    `;
+    body.innerHTML = html;
+    
+    const pr = document.getElementById('iniProbField'), sl = document.getElementById('iniSolField');
+    const update = () => { state.iniciativa_problema = pr.value; state.iniciativa_solucion = sl.value; validateCurrentStep(); };
+    pr.addEventListener('input', update);
+    sl.addEventListener('input', update);
+    pr.focus();
+  }
+  
+  else if (key === 'beneficios_ini') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 5 · Impacto Esperado';
+    const beneficios = ['Ahorro de tiempo', 'Reducción de errores', 'Mejor servicio al cliente', 'Automatización de tareas', 'Generación de conocimiento', 'Otro'];
+    
+    html = `
+      <div class="q-num">Pregunta 5 de 7</div>
+      <div class="q-title">¿Qué beneficios aporta tu solución?</div>
+      <div class="q-ctx">El ahorro de tiempo y el volumen de usuarios nos ayuda a calcular el ROI del desarrollo.</div>
+      
+      <div class="flabel">Beneficio Principal Esperado *</div>
+      <select class="field" id="iniBeneField" style="margin-bottom:18px">
+        <option value="" disabled ${!state.iniciativa_beneficio ? 'selected' : ''}>Elige el beneficio principal</option>
+        ${beneficios.map(b => `<option ${state.iniciativa_beneficio === b ? 'selected' : ''}>${b}</option>`).join('')}
+      </select>
+      
+      <div class="flabel">¿Cuánto tiempo ahorra esta solución cada vez que se usa? *</div>
+      <div style="display:flex; gap:10px; margin-bottom:18px">
+        <input type="number" min="1" class="field" id="iniAhorroVal" placeholder="Cantidad" value="${state.iniciativa_ahorro_valor}" style="flex:1">
+        <select class="field" id="iniAhorroUn" style="flex:1">
+          <option value="segundos" ${state.iniciativa_ahorro_uid === 'segundos' ? 'selected' : ''}>segundos</option>
+          <option value="minutos" ${state.iniciativa_ahorro_unidad === 'minutos' ? 'selected' : ''}>minutos</option>
+          <option value="horas" ${state.iniciativa_ahorro_unidad === 'horas' ? 'selected' : ''}>horas</option>
+        </select>
+      </div>
+      
+      <div class="flabel">¿Cuántas personas estimas que podrían usar tu solución? *</div>
+      <input type="number" min="1" class="field" id="iniUsersField" placeholder="Ej: 15" value="${state.iniciativa_usuarios_estimados}">
+    `;
+    body.innerHTML = html;
+    
+    const bn = document.getElementById('iniBeneField'), av = document.getElementById('iniAhorroVal'), au = document.getElementById('iniAhorroUn'), us = document.getElementById('iniUsersField');
+    const update = () => { 
+      state.iniciativa_ahorro_valor = av.value; 
+      state.iniciativa_usuarios_estimados = us.value; 
+      validateCurrentStep(); 
+    };
+    bn.addEventListener('change', () => { state.iniciativa_beneficio = bn.value; update(); });
+    av.addEventListener('input', update);
+    au.addEventListener('change', () => { state.iniciativa_ahorro_unidad = au.value; update(); });
+    us.addEventListener('input', update);
+  }
+  
+  else if (key === 'tech_ini') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 6 · Elementos Técnicos';
+    const techOptions = ['GPT', 'Codex', 'Copilot', 'Claude Code', 'Gemini', 'OCR', 'Búsqueda documental', 'Automatización', 'Antigravity', 'Power Platform', 'Otro'];
+    const sourceOptions = ['SharePoint', 'Archivos locales', 'Base de datos', 'ERP', 'CRM', 'Correos', 'Otro'];
+    
+    html = `
+      <div class="q-num">Pregunta 6 de 7</div>
+      <div class="q-title">¿Qué herramientas y fuentes utiliza?</div>
+      <div class="q-ctx">Selecciona todos los componentes y orígenes de datos que se conectan en tu solución.</div>
+      
+      <div class="flabel" style="margin-bottom:8px">Componentes Utilizados * (Selecciona al menos uno)</div>
+      <div class="chips-grid" style="margin-bottom:18px">
+        ${techOptions.map(t => {
+          const sel = state.iniciativa_componentes.includes(t);
+          return `<button type="button" class="chip-select ${sel ? 'sel' : ''}" onclick="toggleChip('iniciativa_componentes', '${t}', this)">
+            <span class="check"><svg viewBox="0 0 24 24">${ICONS.check}</svg></span>
+            <span>${t}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      
+      <div class="flabel" style="margin-bottom:8px">Fuentes de Información * (Selecciona al menos una)</div>
+      <div class="chips-grid">
+        ${sourceOptions.map(s => {
+          const sel = state.iniciativa_fuentes.includes(s);
+          return `<button type="button" class="chip-select ${sel ? 'sel' : ''}" onclick="toggleChip('iniciativa_fuentes', '${s}', this)">
+            <span class="check"><svg viewBox="0 0 24 24">${ICONS.check}</svg></span>
+            <span>${s}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    `;
+    body.innerHTML = html;
+  }
+  
+  else if (key === 'participacion_ini') {
+    document.getElementById('flowEyebrow').textContent = 'Último Paso · Cocreación';
+    html = `
+      <div class="q-num">Último Paso</div>
+      <div class="q-title">¿Quieres seguir participando en este proyecto?</div>
+      <div class="q-ctx">Queremos saber qué rol deseas asumir en el desarrollo o refinamiento de tu idea junto con el equipo de tecnología.</div>
+      <div class="opt-stack">
+        ${optRow('build', 'Sí, quiero liderar/construir la solución', 'Me encargo del código/desarrollo principal', state.tarea_participacion === 'construir', "setPart('construir')")}
+        ${optRow('hand', 'Me interesa participar acompañado', 'Quiero trabajar junto al equipo de innovación', state.tarea_participacion === 'apoyo', "setPart('apoyo')")}
+        ${optRow('seed', 'Solo aporto la iniciativa/cuestionario', 'Que el equipo de desarrollo técnico la lidere', state.tarea_participacion === 'aporto', "setPart('aporto')")}
+      </div>
+    `;
+    body.innerHTML = html;
+    nextBtn.textContent = 'Enviar iniciativa';
+  }
+  
+  // ==========================================
+  // FLUJO TAREA TEDIOSA (HTML)
+  // ==========================================
+  
+  else if (key === 'identidad_tar') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 1 · Quién eres';
+    html = `
+      <div class="q-num">Pregunta 1</div>
+      <div class="q-title">¿Quién reporta este proceso?</div>
+      <div class="q-ctx">Para saber a qué áreas de Ikusi impactan estas tareas manuales.</div>
+      
+      <div class="flabel">Tu Nombre Completo *</div>
+      <input class="field" id="tarNombre" placeholder="Nombre y apellido" value="${state.nombre}" style="margin-bottom:14px">
+      
+      <div class="flabel">Tu Área *</div>
+      <select class="field" id="tarArea">
+        <option value="" ${!state.area ? 'selected' : ''} disabled>Elige tu área</option>
+        ${AREAS.map(a => `<option ${state.area === a ? 'selected' : ''}>${a}</option>`).join('')}
+      </select>
+    `;
+    body.innerHTML = html;
+    
+    const n = document.getElementById('tarNombre'), a = document.getElementById('tarArea');
+    const update = () => { state.nombre = n.value; validateCurrentStep(); };
+    n.addEventListener('input', update);
+    a.addEventListener('change', () => { state.area = a.value; update(); });
+    n.focus();
+  }
+  
+  else if (key === 'tarea_tar') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 2 · Tu día a día';
+    html = `
+      <div class="q-num">Pregunta 2</div>
+      <div class="q-title">¿Qué tarea repetitiva te quita más tiempo?</div>
+      <div class="q-ctx">Elige la que más te pese en tu labor diaria. Un solo toque.</div>
+      <div class="opt-stack">
+        ${TASKS.map(t => optRow(t.icon, t.name, t.meta, state.tarea_tipo === t.id, `setTareaTipo('${t.id}')`)).join('')}
+      </div>
+    `;
+    body.innerHTML = html;
+  }
+  
+  else if (key === 'tiempo_tar') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 2 · Tu día a día';
+    const freqs = ['Varias veces al día', 'Una vez al día', 'Cada semana', 'Cada mes', 'De vez en cuando'];
+    html = `
+      <div class="q-num">Pregunta 3</div>
+      <div class="q-title">¿Cada cuánto la realizas y cuánto te toma?</div>
+      <div class="q-ctx">Así cuantificamos el tiempo improductivo real y priorizamos qué procesos resolver.</div>
+      
+      <div class="flabel">¿Con qué frecuencia? *</div>
+      <select class="field" id="tarFreq" style="margin-bottom:14px">
+        <option value="" disabled ${!state.tarea_frecuencia ? 'selected' : ''}>Elige una opción</option>
+        ${freqs.map(f => `<option ${state.tarea_frecuencia === f ? 'selected' : ''}>${f}</option>`).join('')}
+      </select>
+      
+      <div class="flabel">¿Cuánto te toma hacerla cada vez? *</div>
+      <div style="display:flex; gap:10px">
+        <input type="number" min="1" class="field" id="tarDur" placeholder="Ej: 2" value="${state.tarea_duracion}" style="flex:1">
+        <select class="field" id="tarUnit" style="flex:1">
+          <option ${state.tarea_unidad === 'minutos' ? 'selected' : ''}>minutos</option>
+          <option ${state.tarea_unidad === 'horas' ? 'selected' : ''}>horas</option>
+          <option ${state.tarea_unidad === 'días' ? 'selected' : ''}>días</option>
+        </select>
+      </div>
+    `;
+    body.innerHTML = html;
+    
+    const fr = document.getElementById('tarFreq'), du = document.getElementById('tarDur'), un = document.getElementById('tarUnit');
+    const update = () => { 
+      state.tarea_duracion = du.value; 
+      validateCurrentStep(); 
+    };
+    fr.addEventListener('change', () => { state.tarea_frecuencia = fr.value; update(); });
+    du.addEventListener('input', update);
+    un.addEventListener('change', () => { state.tarea_unidad = un.value; });
+  }
+  
+  else if (key === 'tieneidea_tar') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 3 · ¿Y una idea?';
+    html = `
+      <div class="q-num">Pregunta 4</div>
+      <div class="q-title">¿Tienes una idea de cómo se podría automatizar?</div>
+      <div class="q-ctx">Si tienes una idea o sugerencia, cuéntanosla. Si no, reportar la tarea ya nos es muy útil para priorizarla.</div>
+      <div class="opt-stack">
+        ${optRow('yes', 'Sí, tengo una propuesta en mente', 'Quiero describir cómo optimizarlo', state.tarea_tiene_idea === 'si', "setTieneIdea('si')")}
+        ${optRow('no', 'No, solo quería reportar la tarea tediosa', 'Tu aporte es clave para visibilizar el problema', state.tarea_tiene_idea === 'no', "setTieneIdea('no')")}
+      </div>
+    `;
+    body.innerHTML = html;
+  }
+  
+  else if (key === 'idea_tar') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 3 · Tu Idea';
+    const taskLabel = TASKS.find(x => x.id === state.tarea_tipo)?.name || 'esta tarea';
+    html = `
+      <div class="q-num">Pregunta 5</div>
+      <div class="q-title">¿En qué consiste tu idea?</div>
+      <div class="q-ctx">Describe cómo crees que se podría automatizar o mejorar: <b>${taskLabel.toLowerCase()}</b>.</div>
+      
+      <div class="flabel">Título corto para tu idea *</div>
+      <input class="field" id="tarIdeaNom" maxlength="70" placeholder="Ej: Script procesador de tickets" value="${state.tarea_idea_nombre}" style="margin-bottom:14px">
+      
+      <div class="flabel">Explicación breve *</div>
+      <textarea class="field" id="tarIdeaDesc" maxlength="220" placeholder="¿Qué haría este desarrollo y cómo te facilitaría la vida?">${state.tarea_idea_descripcion}</textarea>
+      <div class="hint"><span id="charCount">0</span>/220 caracteres</div>
+    `;
+    body.innerHTML = html;
+    
+    const nm = document.getElementById('tarIdeaNom'), ds = document.getElementById('tarIdeaDesc'), cc = document.getElementById('charCount');
+    cc.textContent = state.tarea_idea_descripcion.length;
+    const update = () => { 
+      state.tarea_idea_nombre = nm.value; 
+      state.tarea_idea_descripcion = ds.value; 
+      cc.textContent = ds.value.length; 
+      validateCurrentStep(); 
+    };
+    nm.addEventListener('input', update);
+    ds.addEventListener('input', update);
+    nm.focus();
+  }
+  
+  else if (key === 'estado_tar') {
+    document.getElementById('flowEyebrow').textContent = 'Paso 3 · Avance de tu Idea';
+    const tools = ['Aún a mano / ninguna', 'Python / scripts', 'Power Automate', 'Macros de Excel', 'GPT', 'Claude', 'Copilot', 'Gemini', 'OCR', 'Otra'];
+    
+    html = `
+      <div class="q-num">Pregunta 6</div>
+      <div class="q-title">¿Cuál es el estado de esta idea?</div>
+      <div class="q-ctx">Ayúdanos a evaluar qué tan cerca está de materializarse.</div>
+      
+      <div class="flabel">Punto de desarrollo *</div>
+      <select class="field" id="tarIdeaEst" style="margin-bottom:18px">
+        <option value="" disabled ${!state.tarea_idea_estado ? 'selected' : ''}>Elige una opción</option>
+        <option value="idea" ${state.tarea_idea_estado === 'idea' ? 'selected' : ''}>Es sólo una idea conceptual (nada construido)</option>
+        <option value="explora" ${state.tarea_idea_estado === 'explora' ? 'selected' : ''}>Tengo un prototipo o borrador iniciado</option>
+        <option value="hecho" ${state.tarea_idea_estado === 'hecho' ? 'selected' : ''}>Ya lo tengo desarrollado y en funcionamiento local</option>
+      </select>
+      
+      <div class="flabel">¿Con qué herramienta la armaste o imaginas armarla? *</div>
+      <select class="field" id="tarIdeaHerra">
+        <option value="" disabled ${!state.tarea_idea_herramienta ? 'selected' : ''}>Elige una herramienta</option>
+        ${tools.map(t => `<option ${state.tarea_idea_herramienta === t ? 'selected' : ''}>${t}</option>`).join('')}
+      </select>
+    `;
+    body.innerHTML = html;
+    
+    const es = document.getElementById('tarIdeaEst'), hr = document.getElementById('tarIdeaHerra');
+    const update = () => { validateCurrentStep(); };
+    es.addEventListener('change', () => { state.tarea_idea_estado = es.value; update(); });
+    hr.addEventListener('change', () => { state.tarea_idea_herramienta = hr.value; update(); });
+  }
+  
+  else if (key === 'participacion_tar') {
+    document.getElementById('flowEyebrow').textContent = 'Último Paso · ¿Contamos contigo?';
+    const txt = state.tarea_tiene_idea === 'si' 
+      ? 'Queremos que seas parte de la cocreación de tu idea. ¿Cómo te gustaría involucrarte?'
+      : 'Aunque no tengas una solución definida, nos encantaría que nos acompañes a diseñar e implementar la automatización. ¿Te sumas?';
+      
+    html = `
+      <div class="q-num">Último Paso</div>
+      <div class="q-title">¿Quieres ser parte de la solución?</div>
+      <div class="q-ctx">${txt} Tu honestidad es bienvenida: si sólo deseas reportarla, también nos ayuda.</div>
+      <div class="opt-stack">
+        ${optRow('build', 'Sí, me gustaría participar construyéndola', 'Quiero programar o armar el flujo técnico', state.tarea_participacion === 'construir', "setPart('construir')")}
+        ${optRow('hand', 'Me interesa participar pero acompañado', 'Deseo guiar al equipo de automatización', state.tarea_participacion === 'apoyo', "setPart('apoyo')")}
+        ${optRow('seed', 'Solo reporto esta necesidad', 'Prefiero que el equipo técnico la desarrolle', state.tarea_participacion === 'aporto', "setPart('aporto')")}
+      </div>
+    `;
+    body.innerHTML = html;
+    nextBtn.textContent = 'Enviar reporte';
+  }
+  
+  validateCurrentStep();
+}
+
+// Setters rápidos
+function setTareaTipo(val) { state.tarea_tipo = val; renderStep(); }
+function setTieneIdea(val) { state.tarea_tiene_idea = val; renderStep(); }
+function setPart(val) { state.tarea_participacion = val; renderStep(); }
+
+function nextStep() {
+  const all = getSteps();
+  if (step < all.length - 1) {
+    step++;
+    renderStep();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    submit();
+  }
+}
+
+function prevStep() {
+  if (step > 0) {
+    step--;
+    renderStep();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    restart();
+  }
+}
+
+async function submit() {
+  let finalData = {};
+  
+  if (state.flowType === 'iniciativa') {
+    // Calcular segundos acumulados
+    let multiplier = 60; // default minutos
+    if (state.iniciativa_ahorro_unidad === 'segundos') multiplier = 1;
+    if (state.iniciativa_ahorro_unidad === 'horas') multiplier = 3600;
+    const segundos = Math.round(Number(state.iniciativa_ahorro_valor) * multiplier);
+    
+    finalData = {
+      type: 'iniciativa',
+      nombre: state.nombre,
+      area: state.area,
+      email: state.email,
+      iniciativa_nombre: state.iniciativa_nombre,
+      iniciativa_estado: state.iniciativa_estado,
+      iniciativa_impacto: state.iniciativa_impacto,
+      iniciativa_destinatario: state.iniciativa_destinatario,
+      iniciativa_tipo_tech: state.iniciativa_tipo_tech,
+      iniciativa_problema: state.iniciativa_problema,
+      iniciativa_solucion: state.iniciativa_solucion,
+      iniciativa_beneficio: state.iniciativa_beneficio,
+      iniciativa_ahorro_segundos: segundos,
+      iniciativa_usuarios_estimados: Number(state.iniciativa_usuarios_estimados),
+      iniciativa_componentes: state.iniciativa_componentes,
+      iniciativa_fuentes: state.iniciativa_fuentes,
+      tarea_participacion: state.tarea_participacion // Rol de participación
+    };
+  } else {
+    finalData = {
+      type: 'tarea',
+      nombre: state.nombre,
+      area: state.area,
+      tarea_tipo: state.tarea_tipo,
+      tarea_frecuencia: state.tarea_frecuencia,
+      tarea_duracion: state.tarea_duracion,
+      tarea_unidad: state.tarea_unidad,
+      tarea_tiene_idea: state.tarea_tiene_idea,
+      tarea_idea_nombre: state.tarea_tiene_idea === 'si' ? state.tarea_idea_nombre : null,
+      tarea_idea_descripcion: state.tarea_tiene_idea === 'si' ? state.tarea_idea_descripcion : null,
+      tarea_idea_estado: state.tarea_tiene_idea === 'si' ? state.tarea_idea_estado : null,
+      tarea_idea_herramienta: state.tarea_tiene_idea === 'si' ? state.tarea_idea_herramienta : null,
+      tarea_participacion: state.tarea_participacion
+    };
+  }
+
+  // Lógica de guardado según entorno
+  if (isDemo) {
+    // Modo demo: Guardar en localStorage
+    liveCount++;
+    localStorage.setItem('ikusi_live_count', liveCount);
+    
+    const newEntry = {
+      v: state.flowType === 'iniciativa' ? state.iniciativa_nombre : (state.tarea_tiene_idea === 'si' ? state.tarea_idea_nombre : TASKS.find(x => x.id === state.tarea_tipo)?.name || 'Tarea'),
+      by: state.nombre.split(' ')[0],
+      type: state.flowType,
+      idea: state.flowType === 'iniciativa' || state.tarea_tiene_idea === 'si',
+      mine: true
+    };
+    
+    wall.unshift(newEntry);
+    localStorage.setItem('ikusi_wall', JSON.stringify(wall));
+    
+    // Simular retraso de API
+    await new Promise(r => setTimeout(r, 600));
+  } else {
+    // Modo producción: Guardar en SQLite vía API
+    try {
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al enviar los datos al servidor');
+      }
+      
+      liveCount++;
+    } catch(err) {
+      console.error('Error al subir iniciativa:', err);
+      alert('Hubo un problema al guardar la información en el servidor, pero simularemos tu registro.');
+    }
+  }
+
+  // Renderizar pantalla de agradecimiento
+  document.getElementById('liveN').textContent = liveCount;
+  const primerNombre = escapeHtml(state.nombre.split(' ')[0] || 'colega');
+  const esIniciativa = state.flowType === 'iniciativa';
+  
+  const participacionText = {
+    construir: 'quieres participar construyéndola',
+    apoyo: 'quieres participar con el apoyo del equipo',
+    aporto: 'prefieres que el equipo técnico la desarrolle'
+  }[state.tarea_participacion] || '';
+
+  let msg = '';
+  if (esIniciativa) {
+    msg = `Gracias por registrar la iniciativa <b>“${escapeHtml(state.iniciativa_nombre)}”</b>, <b>${primerNombre}</b>. Tu experiencia nos ayuda a entender los desarrollos internos. Dado que <b>${participacionText}</b>, nos mantendremos en contacto contigo.`;
+  } else {
+    if (state.tarea_tiene_idea === 'si') {
+      msg = `Gracias, <b>${primerNombre}</b>. Registramos tu reporte sobre la tarea tediosa e idea <b>“${escapeHtml(state.tarea_idea_nombre)}”</b>. Nos encanta que <b>${participacionText}</b> para hacerla realidad.`;
+    } else {
+      msg = `Gracias, <b>${primerNombre}</b>. Reportaste correctamente el proceso manual repetitivo. Esto ayuda a visualizar el trabajo pesado de tu área.`;
+    }
+  }
+  
+  document.getElementById('doneSub').innerHTML = msg;
+  
+  // Agregar al feed de aportes de la sesión
+  const currentTitle = esIniciativa ? state.iniciativa_nombre : (state.tarea_tiene_idea === 'si' ? state.tarea_idea_nombre : TASKS.find(x => x.id === state.tarea_tipo)?.name || 'Tarea repetitiva');
+  
+  // Añadir la entrada actual a la lista temporal si no está en modo demo
+  if (!isDemo) {
+    wall.unshift({
+      v: currentTitle,
+      by: primerNombre,
+      type: state.flowType,
+      idea: esIniciativa || state.tarea_tiene_idea === 'si',
+      mine: true
+    });
+  }
+  
+  renderWall();
+  show('done');
+}
+
+function renderWall() {
+  document.getElementById('wallList').innerHTML = wall.slice(0, 5).map((c, i) => `
+    <div class="case" style="animation-delay: ${i * 60}ms">
+      <span class="cdot ${c.idea ? 'idea' : ''}"></span>
+      <span class="cv">${escapeHtml(c.v)}</span>
+      <span class="cby">${c.mine ? 'Tú' : escapeHtml(c.by)}${c.idea ? ' · idea' : ''}</span>
+    </div>`).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+// Inicializar
+renderWall();
+
+// Simulación de actividad del equipo en la página principal
+setInterval(() => {
+  if (document.getElementById('hero').classList.contains('active') && Math.random() > 0.65) {
+    liveCount++;
+    document.getElementById('liveN').textContent = liveCount;
+    if (isDemo) localStorage.setItem('ikusi_live_count', liveCount);
+  }
+}, 6000);
+</script>
+</body>
+</html>

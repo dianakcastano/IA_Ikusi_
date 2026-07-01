@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Administración · Ikusi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --bg: #F4F7F3;
+    --surface: #FFFFFF;
+    --ink: #15241B;
+    --ink-soft: #52665A;
+    --green: #15883F;
+    --green-bright: #1FA64C;
+    --green-deep: #0E6630;
+    --mint: #E5F2E7;
+    --mint-2: #F0F7F1;
+    --line: #DCE6DC;
+    --line-strong: #C3D3C5;
+    --gold: #C98A2B;
+    --danger: #BA3C2A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .header {
+    background: #fff;
+    border-bottom: 1.5px solid var(--line);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 15px; color: var(--green-deep); }
+  .brand img { height: 32px; width: auto; object-fit: contain; }
+  .brand-text { font-family: "Schibsted Grotesk", sans-serif; font-weight: 700; border-left: 2px solid var(--line-strong); padding-left: 12px; }
+  
+  .btn {
+    font-family: "Schibsted Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    transition: transform .15s, box-shadow .2s, background .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-primary:hover { background: var(--green-bright); }
+  .btn-ghost { background: transparent; color: var(--ink-soft); border: 1.5px solid var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #A03121; }
+  
+  .container { max-width: 1200px; margin: 32px auto; padding: 0 24px 72px; }
+  
+  /* KPIs Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px; }
+  .kpi-card { background: #fff; border: 1.5px solid var(--line); border-radius: 12px; padding: 22px; display: flex; flex-direction: column; }
+  .kpi-title { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .kpi-val { font-family: "Schibsted Grotesk", sans-serif; font-size: 32px; font-weight: 800; color: var(--green-deep); line-height: 1.1; }
+  .kpi-sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; }
+  
+  /* Visualizations Grid */
+  .charts-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; margin-bottom: 36px; }
+  @media (max-width: 860px) { .charts-grid { grid-template-columns: 1fr; } }
+  .chart-card { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; }
+  .chart-title { font-family: "Schibsted Grotesk", sans-serif; font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 20px; border-bottom: 1.5px solid var(--line); padding-bottom: 8px; }
+  .chart-wrapper { position: relative; height: 260px; width: 100%; display: flex; justify-content: center; }
+  
+  /* Table View Card */
+  .table-card { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 24px; }
+  .table-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .table-title { font-family: "Schibsted Grotesk", sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); }
+  .table-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  
+  .search-input {
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    width: 240px;
+    transition: border-color .15s;
+  }
+  .search-input:focus { outline: none; border-color: var(--green); }
+  
+  .table-wrapper { width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+  th { background: var(--mint-2); font-weight: 600; color: var(--ink-soft); padding: 12px 16px; border-bottom: 1.5px solid var(--line); font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 14px 16px; border-bottom: 1px solid var(--line); color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+  
+  /* Badges */
+  .badge-type { display: inline-flex; padding: 3px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; }
+  .badge-ini { background: var(--mint); color: var(--green-deep); }
+  .badge-tar { background: #FFF2CC; color: #7F6000; }
+  
+  /* Login Screen overlay */
+  .auth-overlay { position: fixed; inset: 0; background: rgba(21, 36, 27, 0.7); backdrop-filter: blur(5px); display: none; place-items: center; z-index: 1000; }
+  .auth-card { background: #fff; border-radius: 16px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); text-align: center; }
+  .auth-logo { width: 64px; height: 64px; border-radius: 14px; background: var(--mint); display: grid; place-items: center; color: var(--green-deep); margin: 0 auto 20px; }
+  .auth-logo svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2.2; }
+  .auth-card h2 { font-family: "Schibsted Grotesk", sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .auth-card p { font-size: 14px; color: var(--ink-soft); margin-bottom: 24px; }
+  .auth-error { color: var(--danger); font-size: 13px; font-weight: 600; margin-top: 10px; display: none; }
+  
+  /* Details Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(3px); display: none; place-items: center; z-index: 200; overflow-y: auto; padding: 20px; }
+  .modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 680px; box-shadow: 0 15px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; animation: zoom .3s ease; }
+  @keyframes zoom { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .modal-header { padding: 20px 24px; border-bottom: 1.5px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-family: "Schibsted Grotesk", sans-serif; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+  .modal-close { background: none; border: none; font-size: 24px; color: var(--ink-soft); cursor: pointer; }
+  .modal-close:hover { color: var(--ink); }
+  .modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
+  
+  .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+  @media (max-width: 500px) { .details-grid { grid-template-columns: 1fr; } }
+  .detail-block { display: flex; flex-direction: column; }
+  .detail-block.full-width { grid-column: span 2; }
+  @media (max-width: 500px) { .detail-block.full-width { grid-column: span 1; } }
+  .detail-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--ink-soft); letter-spacing: 0.05em; margin-bottom: 3px; }
+  .detail-val { font-size: 14.5px; color: var(--ink); background: var(--bg); padding: 8px 12px; border-radius: 6px; min-height: 36px; border: 1px solid var(--line); }
+  
+  .demo-indicator {
+    background: #FFF2CC; border: 1px solid #FFE599; border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; font-size: 13px; color: #7F6000;
+    display: flex; align-items: center; gap: 10px; font-weight: 500;
+  }
+  .demo-indicator svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+  
+  .no-data { text-align: center; padding: 48px; color: var(--ink-soft); font-size: 15px; }
+</style>
+</head>
+<body>
+
+  <!-- AUTHENTICATION DIALOG -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2>Acceso Administrativo</h2>
+      <p>Introduce la contraseña para ver las respuestas de las iniciativas y tareas.</p>
+      <input type="password" id="authPassword" class="field" placeholder="Contraseña" style="margin-bottom:14px; text-align:center;">
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="login()">Verificar Acceso</button>
+      <div class="auth-error" id="authError">Contraseña incorrecta. Inténtalo de nuevo.</div>
+      <div class="hint" id="hintDemo" style="display:none; margin-top:14px;">En modo demo, ingresa la contraseña por defecto: <b>ikusiadmin123</b></div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="brand">
+      <img src="logo-ikusi.jpg" alt="Logo Ikusi" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='grid';">
+      <span id="logoFallback" class="mark" style="display:none; width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--green-bright),var(--green-deep)); place-items:center; color:#fff; font-family:'Schibsted Grotesk'; font-weight:800; font-size:16px;">i</span>
+      <span class="brand-text">Panel Admin</span>
+    </div>
+    <button class="btn btn-ghost" id="logoutBtn" onclick="logout()">Cerrar Sesión</button>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="container">
+    <div class="demo-indicator" id="demoBanner" style="display: none;">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span><b>Modo Demo (Estático):</b> Visualizando las respuestas de demostración de <b>localStorage</b>. Si deseas conectar el backend, despliega la app en un servidor Node y accede a esta ruta.</span>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-title">Total Aportes</span>
+        <span class="kpi-val" id="kpiTotal">0</span>
+        <span class="kpi-sub">Iniciativas y tareas reportadas</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-title">Iniciativas IA</span>
+        <span class="kpi-val" id="kpiIniciativas">0</span>
+        <span class="kpi-sub" id="kpiIniPct">0% del total</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-title">Tareas Manuales</span>
+        <span class="kpi-val" id="kpiTareas">0</span>
+        <span class="kpi-sub" id="kpiTarPct">0% del total</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-title">Tiempo Ahorrado</span>
+        <span class="kpi-val" id="kpiTiempo">0 h</span>
+        <span class="kpi-sub">Proyección acumulada por mes</span>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3 class="chart-title">Aportes por Área</h3>
+        <div class="chart-wrapper">
+          <canvas id="chartAreas"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Tecnologías y Fuentes de Datos (Iniciativas)</h3>
+        <div class="chart-wrapper">
+          <canvas id="chartTech"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3 class="table-title">Registros Recibidos</h3>
+        <div class="table-actions">
+          <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, área..." oninput="filterTable()">
+          <button class="btn btn-ghost" onclick="exportCSV()">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Exportar CSV
+          </button>
+        </div>
+      </div>
+      
+      <div class="table-wrapper">
+        <table id="submissionsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tipo</th>
+              <th>Colaborador</th>
+              <th>Área</th>
+              <th>Nombre de Idea / Tarea</th>
+              <th>Estado / Frecuencia</th>
+              <th>Fecha de Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dinámico -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- DETAILS MODAL -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="badge-type" id="modalTypeBadge">TIPO</span>
+          <span id="modalHeaderTitle">Detalles del Registro</span>
+        </div>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="details-grid" id="modalDetailsContent">
+          <!-- Dinámico -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Variables globales
+    let submissionsList = [];
+    let areasChart = null;
+    let techChart = null;
+    
+    // Detectar modo demo
+    const isDemo = window.location.hostname.includes('github.io') || 
+                   window.location.protocol === 'file:' || 
+                   window.location.search.includes('demo=true');
+                   
+    if (isDemo) {
+      document.getElementById('demoBanner').style.display = 'flex';
+      document.getElementById('hintDemo').style.display = 'block';
+    }
+
+    // Al cargar la página
+    window.onload = function() {
+      const pwd = sessionStorage.getItem('ikusi_admin_pwd');
+      if (pwd) {
+        loadData(pwd);
+      } else {
+        document.getElementById('authOverlay').style.display = 'grid';
+        document.getElementById('authPassword').focus();
+      }
+      
+      // Permitir login al presionar Enter
+      document.getElementById('authPassword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') login();
+      });
+    };
+
+    async function login() {
+      const pwdInput = document.getElementById('authPassword');
+      const password = pwdInput.value;
+      const errorDiv = document.getElementById('authError');
+      
+      if (!password) return;
+      
+      if (isDemo) {
+        // En modo demo aceptamos "ikusiadmin123"
+        if (password === 'ikusiadmin123') {
+          sessionStorage.setItem('ikusi_admin_pwd', password);
+          document.getElementById('authOverlay').style.display = 'none';
+          loadData(password);
+        } else {
+          errorDiv.style.display = 'block';
+          pwdInput.focus();
+        }
+      } else {
+        // En producción llamamos al backend
+        try {
+          const response = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+          });
+          
+          if (response.ok) {
+            sessionStorage.setItem('ikusi_admin_pwd', password);
+            document.getElementById('authOverlay').style.display = 'none';
+            loadData(password);
+          } else {
+            errorDiv.style.display = 'block';
+            pwdInput.focus();
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Error de red al intentar autenticar con el servidor.');
+        }
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem('ikusi_admin_pwd');
+      window.location.reload();
+    }
+
+    // Cargar los datos y renderizar el panel
+    async function loadData(pwd) {
+      if (isDemo) {
+        // Mock de datos iniciales en localStorage si está vacío
+        const localData = localStorage.getItem('ikusi_submissions');
+        if (localData) {
+          try { submissionsList = JSON.parse(localData); } catch(e) {}
+        } else {
+          submissionsList = getMockSubmissions();
+          localStorage.setItem('ikusi_submissions', JSON.stringify(submissionsList));
+        }
+      } else {
+        // API real
+        try {
+          const response = await fetch('/api/submissions', {
+            headers: { 'Authorization': pwd }
+          });
+          if (response.status === 401) {
+            logout();
+            return;
+          }
+          const resData = await response.json();
+          if (resData.success) {
+            submissionsList = resData.submissions;
+          }
+        } catch(err) {
+          console.error('Error al descargar registros:', err);
+          alert('No se pudo conectar con el backend. Cargando datos simulados locales.');
+          submissionsList = getMockSubmissions();
+        }
+      }
+      
+      renderDashboard();
+    }
+
+    function getMockSubmissions() {
+      return [
+        {
+          id: 1,
+          type: 'iniciativa',
+          nombre: 'Andrés López',
+          area: 'Preventa / Ingeniería',
+          email: 'alopez@ikusi.com',
+          iniciativa_nombre: 'Asistente de Cotización Automatizada',
+          iniciativa_estado: 'Implementado',
+          iniciativa_impacto: 'Preventa / Ingeniería',
+          iniciativa_destinatario: 'Cliente Interno',
+          iniciativa_tipo_tech: 'Asistente documental',
+          iniciativa_problema: 'Leer PDFs de pliegos técnicos de clientes toma más de 5 horas por propuesta, causando cuellos de botella.',
+          iniciativa_solucion: 'Procesador RAG que lee PDFs de licitaciones y sugiere la arquitectura de hardware adecuada con base en plantillas.',
+          iniciativa_beneficio: 'Ahorro de tiempo',
+          iniciativa_ahorro_segundos: 10800, // 3 horas
+          iniciativa_usuarios_estimados: 12,
+          iniciativa_componentes: ['GPT', 'Gemini', 'Búsqueda documental'],
+          iniciativa_fuentes: ['Archivos locales', 'CRM'],
+          tarea_participacion: 'construir',
+          created_at: '2026-06-30T14:22:10Z'
+        },
+        {
+          id: 2,
+          type: 'tarea',
+          nombre: 'María Camila Gómez',
+          area: 'Operaciones / Delivery',
+          tarea_tipo: 'excel',
+          tarea_frecuencia: 'Cada semana',
+          tarea_duracion: '4',
+          tarea_unidad: 'horas',
+          tarea_tiene_idea: 'si',
+          tarea_idea_nombre: 'Consolidador Semanal de Horas NOC',
+          tarea_idea_descripcion: 'Juntar reportes de Excel de los técnicos en un solo consolidado mensual.',
+          tarea_idea_estado: 'explora',
+          tarea_idea_herramienta: 'Python / scripts',
+          tarea_participacion: 'apoyo',
+          created_at: '2026-06-30T10:15:30Z'
+        },
+        {
+          id: 3,
+          type: 'iniciativa',
+          nombre: 'Felipe Mendoza',
+          area: 'NOC',
+          email: 'fmendoza@ikusi.com',
+          iniciativa_nombre: 'Parser de Alarmas de Red',
+          iniciativa_estado: 'Prueba de concepto',
+          iniciativa_impacto: 'NOC',
+          iniciativa_destinatario: 'Cliente Interno',
+          iniciativa_tipo_tech: 'Automatización',
+          iniciativa_problema: 'Las alarmas de los routers Cisco inundan los buzones del NOC y se filtran a mano.',
+          iniciativa_solucion: 'Script en Python que lee logs, clasifica criticidad y envía a Teams solo los eventos críticos.',
+          iniciativa_beneficio: 'Reducción de errores',
+          iniciativa_ahorro_segundos: 600, // 10 min por incidente, unas 5 horas al mes
+          iniciativa_usuarios_estimados: 8,
+          iniciativa_componentes: ['Automatización'],
+          iniciativa_fuentes: ['Correos', 'Base de datos'],
+          tarea_participacion: 'construir',
+          created_at: '2026-06-29T18:05:00Z'
+        },
+        {
+          id: 4,
+          type: 'tarea',
+          nombre: 'Sebastián Ortiz',
+          area: 'Mesa de ayuda / Soporte',
+          tarea_tipo: 'copy',
+          tarea_frecuencia: 'Varias veces al día',
+          tarea_duracion: '15',
+          tarea_unidad: 'minutos',
+          tarea_tiene_idea: 'no',
+          tarea_participacion: 'aporto',
+          created_at: '2026-06-28T09:40:00Z'
+        }
+      ];
+    }
+
+    function renderDashboard() {
+      renderKPIs();
+      renderCharts();
+      renderTable(submissionsList);
+    }
+
+    function renderKPIs() {
+      const total = submissionsList.length;
+      const iniciativas = submissionsList.filter(x => x.type === 'iniciativa').length;
+      const tareas = submissionsList.filter(x => x.type === 'tarea').length;
+      
+      document.getElementById('kpiTotal').textContent = total;
+      document.getElementById('kpiIniciativas').textContent = iniciativas;
+      document.getElementById('kpiTareas').textContent = tareas;
+      
+      document.getElementById('kpiIniPct').textContent = total > 0 ? `${Math.round((iniciativas/total)*100)}% del total` : '0%';
+      document.getElementById('kpiTarPct').textContent = total > 0 ? `${Math.round((tareas/total)*100)}% del total` : '0%';
+      
+      // Ahorro de tiempo proyectado al mes
+      let totalSegundosMes = 0;
+      submissionsList.forEach(item => {
+        if (item.type === 'iniciativa') {
+          // El ahorro de la iniciativa asumimos que se ahorra con cierta recurrencia o uso del sistema
+          // Vamos a asumir que las iniciativas se usan unas 20 veces al mes por usuario
+          const usuarios = item.iniciativa_usuarios_estimados || 1;
+          const ahorro = item.iniciativa_ahorro_segundos || 0;
+          totalSegundosMes += (ahorro * usuarios * 15); // promedio 15 ejecuciones mensuales por usuario
+        } else {
+          // Tarea tediosa
+          let duracionHoras = Number(item.tarea_duracion) || 0;
+          if (item.tarea_unidad === 'minutos') duracionHoras = duracionHoras / 60;
+          if (item.tarea_unidad === 'días') duracionHoras = duracionHoras * 8; // jornada laboral
+          
+          let vecesAlMes = 0;
+          if (item.tarea_frecuencia === 'Varias veces al día') vecesAlMes = 20 * 3; // 3 veces al día laborable
+          else if (item.tarea_frecuencia === 'Una vez al día') vecesAlMes = 20;
+          else if (item.tarea_frecuencia === 'Cada semana') vecesAlMes = 4;
+          else if (item.tarea_frecuencia === 'Cada mes') vecesAlMes = 1;
+          else if (item.tarea_frecuencia === 'De vez en cuando') vecesAlMes = 0.5;
+          
+          totalSegundosMes += (duracionHoras * vecesAlMes * 3600);
+        }
+      });
+      
+      const totalHorasMes = Math.round(totalSegundosMes / 3600);
+      document.getElementById('kpiTiempo').textContent = `${totalHorasMes.toLocaleString()} h`;
+    }
+
+    function renderCharts() {
+      // 1. Destruir gráficos anteriores si existen
+      if (areasChart) areasChart.destroy();
+      if (techChart) techChart.destroy();
+      
+      // Agrupar por áreas
+      const areaCounts = {};
+      submissionsList.forEach(item => {
+        const area = item.area || 'No especificada';
+        areaCounts[area] = (areaCounts[area] || 0) + 1;
+      });
+      
+      const areasLabels = Object.keys(areaCounts);
+      const areasData = Object.values(areaCounts);
+      
+      // Gráfico de Áreas
+      const ctxAreas = document.getElementById('chartAreas').getContext('2d');
+      areasChart = new Chart(ctxAreas, {
+        type: 'doughnut',
+        data: {
+          labels: areasLabels,
+          datasets: [{
+            data: areasData,
+            backgroundColor: [
+              '#15883F', // Verde Ikusi
+              '#1FA64C', // Verde claro
+              '#0E6630', // Verde oscuro
+              '#C98A2B', // Oro/Marrón
+              '#52665A', // Carbón suave
+              '#C3D3C5', // Menta fuerte
+              '#BA3C2A', // Rojo
+              '#B9CDBE'
+            ],
+            borderWidth: 1.5,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12,
+                font: { family: 'Hanken Grotesk', size: 12 }
+              }
+            }
+          }
+        }
+      });
+      
+      // Gráfico de Tecnologías/Componentes
+      const techCounts = {};
+      const sourceCounts = {};
+      submissionsList.forEach(item => {
+        if (item.type === 'iniciativa') {
+          // Tecnologías
+          let comps = item.iniciativa_componentes || [];
+          if (typeof comps === 'string') {
+            try { comps = JSON.parse(comps); } catch(e) { comps = comps.split(','); }
+          }
+          comps.forEach(c => {
+            const clean = c.trim();
+            if (clean) techCounts[clean] = (techCounts[clean] || 0) + 1;
+          });
+          
+          // Fuentes
+          let src = item.iniciativa_fuentes || [];
+          if (typeof src === 'string') {
+            try { src = JSON.parse(src); } catch(e) { src = src.split(','); }
+          }
+          src.forEach(s => {
+            const clean = s.trim();
+            if (clean) sourceCounts[clean] = (sourceCounts[clean] || 0) + 1;
+          });
+        } else if (item.type === 'tarea' && item.tarea_tiene_idea === 'si' && item.tarea_idea_herramienta) {
+          const clean = item.tarea_idea_herramienta.trim();
+          techCounts[clean] = (techCounts[clean] || 0) + 1;
+        }
+      });
+      
+      const techLabels = Object.keys(techCounts);
+      const techVals = Object.values(techCounts);
+      
+      const ctxTech = document.getElementById('chartTech').getContext('2d');
+      techChart = new Chart(ctxTech, {
+        type: 'bar',
+        data: {
+          labels: techLabels,
+          datasets: [
+            {
+              label: 'Usos de la tecnología / herramienta',
+              data: techVals,
+              backgroundColor: 'rgba(21, 136, 63, 0.85)',
+              borderColor: 'var(--green-deep)',
+              borderWidth: 1.5,
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, font: { family: 'Hanken Grotesk' } }
+            },
+            x: {
+              ticks: { font: { family: 'Hanken Grotesk' } }
+            }
+          }
+        }
+      });
+    }
+
+    function renderTable(items) {
+      const tbody = document.getElementById('tableBody');
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="no-data">No se encontraron registros en el sistema.</td></tr>`;
+        return;
+      }
+      
+      tbody.innerHTML = items.map((row, i) => {
+        const isIni = row.type === 'iniciativa';
+        const typeBadge = isIni 
+          ? `<span class="badge-type badge-ini">Iniciativa</span>`
+          : `<span class="badge-type badge-tar">Tarea</span>`;
+          
+        const title = isIni 
+          ? row.iniciativa_nombre 
+          : (row.tarea_tiene_idea === 'si' ? `[Idea] ${row.tarea_idea_nombre}` : `[Tarea] ${getTaskName(row.tarea_tipo)}`);
+          
+        const statusDetail = isIni
+          ? row.iniciativa_estado
+          : `${row.tarea_frecuencia} (${row.tarea_duracion} ${row.tarea_unidad})`;
+          
+        const date = new Date(row.created_at).toLocaleDateString('es-ES', {
+          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        
+        return `
+          <tr>
+            <td>#${row.id}</td>
+            <td>${typeBadge}</td>
+            <td><strong>${escapeHtml(row.nombre)}</strong></td>
+            <td>${escapeHtml(row.area)}</td>
+            <td>${escapeHtml(title)}</td>
+            <td>${escapeHtml(statusDetail)}</td>
+            <td>${date}</td>
+            <td>
+              <button class="btn btn-ghost" style="padding: 5px 10px; font-size: 12px;" onclick="viewDetails(${row.id})">Detalles</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function getTaskName(id) {
+      const t = {
+        copy: 'Copiar y pegar',
+        report: 'Armar reportes',
+        excel: 'Mantener Excel',
+        mail: 'Responder correos',
+        search: 'Buscar datos',
+        otro: 'Otro proceso'
+      }[id];
+      return t || id || 'No identificada';
+    }
+
+    function filterTable() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (!query) {
+        renderTable(submissionsList);
+        return;
+      }
+      
+      const filtered = submissionsList.filter(item => {
+        const title = item.type === 'iniciativa' ? item.iniciativa_nombre : item.tarea_idea_nombre;
+        return (
+          item.nombre.toLowerCase().includes(query) ||
+          item.area.toLowerCase().includes(query) ||
+          (item.email && item.email.toLowerCase().includes(query)) ||
+          (title && title.toLowerCase().includes(query))
+        );
+      });
+      renderTable(filtered);
+    }
+
+    function viewDetails(id) {
+      const item = submissionsList.find(x => x.id === id);
+      if (!item) return;
+      
+      const isIni = item.type === 'iniciativa';
+      
+      const badge = document.getElementById('modalTypeBadge');
+      badge.textContent = isIni ? 'Iniciativa' : 'Tarea Tediosa';
+      badge.className = `badge-type ${isIni ? 'badge-ini' : 'badge-tar'}`;
+      
+      document.getElementById('modalHeaderTitle').textContent = isIni ? item.iniciativa_nombre : 'Detalles de la Tarea Reportada';
+      
+      let html = '';
+      
+      // Bloques comunes de Información
+      html += `
+        <div class="detail-block">
+          <span class="detail-label">Colaborador</span>
+          <span class="detail-val">${escapeHtml(item.nombre)}</span>
+        </div>
+        <div class="detail-block">
+          <span class="detail-label">Área de Trabajo</span>
+          <span class="detail-val">${escapeHtml(item.area)}</span>
+        </div>
+        <div class="detail-block">
+          <span class="detail-label">Correo Electrónico</span>
+          <span class="detail-val">${escapeHtml(item.email || 'No suministrado')}</span>
+        </div>
+        <div class="detail-block">
+          <span class="detail-label">Fecha de Registro</span>
+          <span class="detail-val">${new Date(item.created_at).toLocaleString('es-ES')}</span>
+        </div>
+      `;
+      
+      if (isIni) {
+        // Bloques específicos de Iniciativa
+        let comps = item.iniciativa_componentes || [];
+        if (typeof comps === 'string') {
+          try { comps = JSON.parse(comps); } catch(e) { comps = [comps]; }
+        }
+        let sources = item.iniciativa_fuentes || [];
+        if (typeof sources === 'string') {
+          try { sources = JSON.parse(sources); } catch(e) { sources = [sources]; }
+        }
+        
+        // Conversión legible de ahorro
+        const ahorroSegundos = item.iniciativa_ahorro_segundos || 0;
+        let ahorroLegible = `${ahorroSegundos} segundos`;
+        if (ahorroSegundos >= 3600) {
+          ahorroLegible = `${(ahorroSegundos/3600).toFixed(1)} horas`;
+        } else if (ahorroSegundos >= 60) {
+          ahorroLegible = `${(ahorroSegundos/60).toFixed(1)} minutos`;
+        }
+
+        html += `
+          <div class="detail-block">
+            <span class="detail-label">Estado de Desarrollo</span>
+            <span class="detail-val">${escapeHtml(item.iniciativa_estado)}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Área Principal Impactada</span>
+            <span class="detail-val">${escapeHtml(item.iniciativa_impacto)}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Tipo de Usuario Destino</span>
+            <span class="detail-val">${escapeHtml(item.iniciativa_destinatario)}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Tipo de Solución</span>
+            <span class="detail-val">${escapeHtml(item.iniciativa_tipo_tech)}</span>
+          </div>
+          
+          <div class="detail-block full-width">
+            <span class="detail-label">Problema que resuelve</span>
+            <span class="detail-val" style="white-space: pre-wrap;">${escapeHtml(item.iniciativa_problema)}</span>
+          </div>
+          <div class="detail-block full-width">
+            <span class="detail-label">Cómo Funciona / Solución</span>
+            <span class="detail-val" style="white-space: pre-wrap;">${escapeHtml(item.iniciativa_solucion)}</span>
+          </div>
+          
+          <div class="detail-block">
+            <span class="detail-label">Beneficio Principal</span>
+            <span class="detail-val">${escapeHtml(item.iniciativa_beneficio)}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Ahorro Estimado (Por ejecución)</span>
+            <span class="detail-val">${ahorroLegible}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Usuarios Estimados</span>
+            <span class="detail-val">${item.iniciativa_usuarios_estimados || 0} personas</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Participación Propuesta</span>
+            <span class="detail-val">${getPartText(item.tarea_participacion)}</span>
+          </div>
+          
+          <div class="detail-block full-width">
+            <span class="detail-label">Componentes Utilizados</span>
+            <span class="detail-val">${escapeHtml(comps.join(', ') || 'Ninguno')}</span>
+          </div>
+          <div class="detail-block full-width">
+            <span class="detail-label">Fuentes de Información</span>
+            <span class="detail-val">${escapeHtml(sources.join(', ') || 'Ninguna')}</span>
+          </div>
+        `;
+      } else {
+        // Bloques específicos de Tarea
+        const tieneIdea = item.tarea_tiene_idea === 'si';
+        html += `
+          <div class="detail-block">
+            <span class="detail-label">Proceso Repetitivo</span>
+            <span class="detail-val">${escapeHtml(getTaskName(item.tarea_tipo))}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Frecuencia de Tarea</span>
+            <span class="detail-val">${escapeHtml(item.tarea_frecuencia)}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Duración Estimada</span>
+            <span class="detail-val">${escapeHtml(item.tarea_duracion)} ${escapeHtml(item.tarea_unidad)} por vez</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">Participación en Solución</span>
+            <span class="detail-val">${getPartText(item.tarea_participacion)}</span>
+          </div>
+          <div class="detail-block">
+            <span class="detail-label">¿Propuso una idea?</span>
+            <span class="detail-val">${tieneIdea ? 'Sí' : 'No'}</span>
+          </div>
+        `;
+        
+        if (tieneIdea) {
+          html += `
+            <div class="detail-block full-width">
+              <span class="detail-label">Nombre de la Idea Propuesta</span>
+              <span class="detail-val">${escapeHtml(item.tarea_idea_nombre)}</span>
+            </div>
+            <div class="detail-block full-width">
+              <span class="detail-label">Descripción de la Idea</span>
+              <span class="detail-val" style="white-space: pre-wrap;">${escapeHtml(item.tarea_idea_descripcion)}</span>
+            </div>
+            <div class="detail-block">
+              <span class="detail-label">Estado de la Idea</span>
+              <span class="detail-val">${escapeHtml(item.tarea_idea_estado === 'idea' ? 'Idea conceptual' : (item.tarea_idea_estado === 'explora' ? 'Prototipo iniciado' : 'Desarrollo en uso'))}</span>
+            </div>
+            <div class="detail-block">
+              <span class="detail-label">Herramienta sugerida</span>
+              <span class="detail-val">${escapeHtml(item.tarea_idea_herramienta)}</span>
+            </div>
+          `;
+        }
+      }
+      
+      document.getElementById('modalDetailsContent').innerHTML = html;
+      document.getElementById('detailsModal').style.display = 'grid';
+    }
+
+    function getPartText(val) {
+      return {
+        construir: 'Liderar y programar el desarrollo',
+        apoyo: 'Participar acompañado de tecnología',
+        aporto: 'Sólo reportar (desarrollo a cargo de TI)'
+      }[val] || val || 'No definida';
+    }
+
+    function closeModal() {
+      document.getElementById('detailsModal').style.display = 'none';
+    }
+
+    // Exportar registros a un archivo CSV estructurado
+    function exportCSV() {
+      if (submissionsList.length === 0) {
+        alert('No hay registros para exportar');
+        return;
+      }
+      
+      const headers = [
+        'ID', 'Tipo Registro', 'Colaborador', 'Area Colaborador', 'Email', 
+        'Nombre Iniciativa/Idea', 'Estado Desarrollo', 'Area Impactada', 
+        'Destinatario', 'Tipo Solucion', 'Descripcion Problema', 'Descripcion Solucion', 
+        'Beneficio Esperado', 'Ahorro Segundos', 'Usuarios Estimados', 
+        'Componentes Utilizados', 'Fuentes de Informacion', 'Tarea Tipo', 
+        'Tarea Frecuencia', 'Tarea Duracion', 'Tarea Unidad', 'Tiene Idea', 
+        'Participacion Propuesta', 'Fecha Registro'
+      ];
+      
+      const rows = submissionsList.map(item => {
+        const isIni = item.type === 'iniciativa';
+        
+        let componentes = '';
+        if (isIni && item.iniciativa_componentes) {
+          componentes = Array.isArray(item.iniciativa_componentes) 
+            ? item.iniciativa_componentes.join('; ') 
+            : item.iniciativa_componentes;
+        }
+        
+        let fuentes = '';
+        if (isIni && item.iniciativa_fuentes) {
+          fuentes = Array.isArray(item.iniciativa_fuentes) 
+            ? item.iniciativa_fuentes.join('; ') 
+            : item.iniciativa_fuentes;
+        }
+
+        return [
+          item.id,
+          item.type,
+          item.nombre,
+          item.area,
+          item.email || '',
+          isIni ? item.iniciativa_nombre : (item.tarea_idea_nombre || ''),
+          isIni ? item.iniciativa_estado : (item.tarea_idea_estado || ''),
+          isIni ? item.iniciativa_impacto : '',
+          isIni ? item.iniciativa_destinatario : '',
+          isIni ? item.iniciativa_tipo_tech : '',
+          isIni ? item.iniciativa_problema : (item.tarea_idea_descripcion || ''),
+          isIni ? item.iniciativa_solucion : '',
+          isIni ? item.iniciativa_beneficio : '',
+          isIni ? item.iniciativa_ahorro_segundos : '',
+          isIni ? item.iniciativa_usuarios_estimados : '',
+          componentes,
+          fuentes,
+          !isIni ? getTaskName(item.tarea_tipo) : '',
+          !isIni ? item.tarea_frecuencia : '',
+          !isIni ? item.tarea_duracion : '',
+          !isIni ? item.tarea_unidad : '',
+          !isIni ? item.tarea_tiene_idea : '',
+          item.tarea_participacion || '',
+          item.created_at
+        ];
+      });
+      
+      // Codificar en CSV con codificación UTF-8 BOM para que Excel abra las tildes correctamente
+      let csvContent = '\uFEFF';
+      csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(',') + '\n';
+      
+      rows.forEach(r => {
+        csvContent += r.map(val => {
+          const str = String(val === null || val === undefined ? '' : val);
+          return `"${str.replace(/"/g, '""')}"`;
+        }).join(',') + '\n';
+      });
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `ikusi_iniciativas_export_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+  </script>
+</body>
+</html>
